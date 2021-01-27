@@ -1,6 +1,6 @@
-import { Either, Right, Left } from './Either'
+import { Either, Left, Right } from './Either'
 import { identity } from './Function'
-import { Maybe, Just, Nothing } from './Maybe'
+import { Just, Maybe, Nothing } from './Maybe'
 import { NonEmptyList } from './NonEmptyList'
 import { JSONSchema6 } from 'json-schema'
 
@@ -112,21 +112,23 @@ export const Codec = {
     properties: T
   ): Codec<
     {
-      [K in keyof Pick<
-        T,
-        {
-          [Key in keyof T]-?: undefined extends GetType<T[Key]> ? never : Key
-        }[keyof T]
-      >]: GetType<T[K]>
-    } &
-      {
+      [K in keyof ({
         [K in keyof Pick<
           T,
           {
-            [Key in keyof T]-?: undefined extends GetType<T[Key]> ? Key : never
+            [K in keyof T]-?: undefined extends GetType<T[K]> ? never : K
           }[keyof T]
-        >]?: Exclude<GetType<T[K]>, undefined>
-      }
+        >]: GetType<T[K]>
+      } &
+        {
+          [K in keyof Pick<
+            T,
+            {
+              [K in keyof T]-?: undefined extends GetType<T[K]> ? K : never
+            }[keyof T]
+          >]?: Exclude<GetType<T[K]>, undefined>
+        })]: GetType<T[K]>
+    }
   > {
     const keys = Object.keys(properties)
 
